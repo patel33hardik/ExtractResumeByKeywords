@@ -31,20 +31,17 @@ def main():
         '-k', '--keywords', required=True, help='Please enter at least one keyword. e.x. python, js'
     )
     parser.add_argument(
-        '-p', '--files_path', default='demo_resume', help='Add files location to be extracted'
+        '-p', '--files_path', default='demo_resumes', help='Add files location to be extracted'
     )
     args = parser.parse_args()
 
     if args.files_path is None or not os.path.exists(args.files_path):
-        printRed('Please provide a valid path..')
         parser.print_help()
-        exit(1)
+        raise ValueError('Please provide a valid path..')
 
     if args.keywords is None:
-        printRed('Please Enter a valid keyword with the comma..')
         parser.print_help()
-        exit(1)
-
+        raise ValueError('Please Enter a valid keyword with the comma..')
 
     keyword_list = args.keywords.split(',')
     shortlisted_resumes = []
@@ -80,5 +77,5 @@ if __name__ == '__main__':
     try:
         sys.exit(main())
     except Exception as ex:
-        print(f'Exception: {ex}')
+        printRed(f'Exception: {ex}')
         sys.exit(1)

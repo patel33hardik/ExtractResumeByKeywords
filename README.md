@@ -55,6 +55,14 @@ Matching keywords: python
 
 4. Filename: Resume4.pdf,
 Matching keywords: js
+
+$ py test_resumeExtractor.py
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+OK
+
 ```
 
 ### License
