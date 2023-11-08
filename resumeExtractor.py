@@ -18,8 +18,8 @@ def printRed(text):
 def search_keywords(text, keywords):
     match_keys = []
     for keyword in keywords:
-        pattern = r'\b{}(?:,)?\b'.format(keyword)
-        if re.search(pattern, text, re.IGNORECASE):
+        pattern = r'\b{}(?:,)?\b'.format(keyword.lower())
+        if re.search(pattern, text.lower(), re.IGNORECASE):
             match_keys.append(keyword)
 
     return match_keys
@@ -45,6 +45,7 @@ def main():
 
     keyword_list = args.keywords.split(',')
     shortlisted_resumes = []
+    no_match_resumes = []
     # Iterate through PDF files in the directory
     for filename in os.listdir(args.files_path):
         if filename.endswith('.pdf'):
@@ -64,11 +65,24 @@ def main():
                         'FileName': filename,
                         'MatchKeywords': ', '.join(matched_keywords)
                     })
+                else:
+                    no_match_resumes.append({
+                        'FileName': filename,
+                        'MatchKeywords': 'No match found'
+                    })
 
     if len(shortlisted_resumes) > 0:
         print("\n***Following are shortlisted resumes.***\n")
+        shortlisted_resumes = sorted(shortlisted_resumes, key=lambda x: len(x['MatchKeywords']), reverse=True)
         for index, resume in enumerate(shortlisted_resumes, start=1):
             printGreen(
+                f'{index}. Filename: {resume["FileName"]}, \nMatching keywords: {resume["MatchKeywords"]}\n'
+            )
+
+    if len(no_match_resumes) > 0:
+        print("\n***Following are resumes with not match keywords found.***\n")
+        for index, resume in enumerate(no_match_resumes, start=1):
+            printRed(
                 f'{index}. Filename: {resume["FileName"]}, \nMatching keywords: {resume["MatchKeywords"]}\n'
             )
 
