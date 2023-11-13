@@ -40,7 +40,7 @@ Suppose you have a directory named demo_resumes/ containing various resumes in P
 You want to search for resumes containing keywords "python" and "js". Run the following command:
 
 ```bash
-$ py resumeExtractor.py -k python,js -p demo_resumes/
+$ py resumeExtractor.py -k "python,js" -p demo_resumes/
 
 ***Following are shortlisted resumes.***
 

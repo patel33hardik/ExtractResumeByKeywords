@@ -19,8 +19,9 @@ def search_keywords(text, keywords):
     match_keys = []
     for keyword in keywords:
         pattern = r'\b{}(?:,)?\b'.format(keyword.lower())
-        if re.search(pattern, text.lower(), re.IGNORECASE):
-            match_keys.append(keyword)
+        matches = re.findall(pattern, text.lower(), re.IGNORECASE)
+        if len(matches) > 0:
+            match_keys.append(f'{keyword} ({len(matches)})')
 
     return match_keys
 
@@ -43,9 +44,11 @@ def main():
         parser.print_help()
         raise ValueError('Please Enter a valid keyword with the comma..')
 
-    keyword_list = args.keywords.split(',')
+    keyword_list = [keyword.strip() for keyword in args.keywords.split(',')]
+    print('----------keyword_list-{}------'.format(keyword_list))
     shortlisted_resumes = []
     no_match_resumes = []
+    invalid_pdfs = []
     # Iterate through PDF files in the directory
     for filename in os.listdir(args.files_path):
         if filename.endswith('.pdf'):
@@ -53,23 +56,27 @@ def main():
 
             # Read the PDF content
             with open(pdf_path, 'rb') as pdf_file:
-                pdf_reader = PyPDF2.PdfReader(pdf_file)
-                resume_text = ""
-                for page_num in range(len(pdf_reader.pages)):
-                    page = pdf_reader.pages[page_num]
-                    resume_text += page.extract_text()
+                try:
+                    pdf_reader = PyPDF2.PdfReader(pdf_file)
+                    resume_text = ""
+                    for page_num in range(len(pdf_reader.pages)):
+                        page = pdf_reader.pages[page_num]
+                        resume_text += page.extract_text()
 
-                matched_keywords = search_keywords(resume_text, keywords=keyword_list)
-                if len(matched_keywords):
-                    shortlisted_resumes.append({
-                        'FileName': filename,
-                        'MatchKeywords': ', '.join(matched_keywords)
-                    })
-                else:
-                    no_match_resumes.append({
-                        'FileName': filename,
-                        'MatchKeywords': 'No match found'
-                    })
+                    matched_keywords = search_keywords(resume_text, keywords=keyword_list)
+                    if len(matched_keywords):
+                        shortlisted_resumes.append({
+                            'FileName': filename,
+                            'MatchKeywords': ', '.join(matched_keywords)
+                        })
+                    else:
+                        no_match_resumes.append({
+                            'FileName': filename,
+                            'MatchKeywords': 'No match found'
+                        })
+                except Exception as e:
+                    invalid_pdfs.append(filename)
+                    continue
 
     if len(shortlisted_resumes) > 0:
         print("\n***Following are shortlisted resumes.***\n")
@@ -85,6 +92,11 @@ def main():
             printRed(
                 f'{index}. Filename: {resume["FileName"]}, \nMatching keywords: {resume["MatchKeywords"]}\n'
             )
+
+    if len(invalid_pdfs) > 0:
+        print("\n***Following are invalid pdf's.***\n")
+        for item in invalid_pdfs:
+            printRed(f'Filename: {item}\n')
 
 
 if __name__ == '__main__':
